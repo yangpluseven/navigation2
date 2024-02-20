@@ -108,17 +108,39 @@ void NoiseGenerator::generateNoisedControls()
 {
   auto & s = settings_;
 
+  // xt::noalias(noises_vx_) = xt::random::randn<float>(
+  //   {s.batch_size, s.time_steps}, 0.0f,
+  //   s.sampling_std.vx);
+  // xt::noalias(noises_wz_) = xt::random::randn<float>(
+  //   {s.batch_size, s.time_steps}, 0.0f,
+  //   s.sampling_std.wz);
+  // if (is_holonomic_) {
+  //   xt::noalias(noises_vy_) = xt::random::randn<float>(
+  //     {s.batch_size, s.time_steps}, 0.0f,
+  //     s.sampling_std.vy);
+  // }
+
+
+  // Tried Normal2LogN(0, np.mean(0.2)) -> 1.1, 0.52
+  // Tried everything down to 0.0, 1e-6 and all is garbage
+
+
   xt::noalias(noises_vx_) = xt::random::randn<float>(
-    {s.batch_size, s.time_steps}, 0.0f,
-    s.sampling_std.vx);
+    {s.batch_size, s.time_steps}, 0.0f, 1.0f) *
+    xt::random::lognormal<float>({s.batch_size, s.time_steps}, 0.0 /*mean*/, 0.000002 /*std*/);
+
   xt::noalias(noises_wz_) = xt::random::randn<float>(
-    {s.batch_size, s.time_steps}, 0.0f,
-    s.sampling_std.wz);
-  if (is_holonomic_) {
-    xt::noalias(noises_vy_) = xt::random::randn<float>(
-      {s.batch_size, s.time_steps}, 0.0f,
-      s.sampling_std.vy);
-  }
+    {s.batch_size, s.time_steps}, 0.0f, 1.0f) *
+    xt::random::lognormal<float>({s.batch_size, s.time_steps}, 0.0 /*mean*/, 0.000004 /*std*/);
+
+  // if (is_holonomic_) {
+  //   xt::noalias(noises_vy_) = xt::random::randn<float>(
+  //     {s.batch_size, s.time_steps}, 0.0, s.sampling_std.vy) *
+  //     xt::random::lognormal<float>({s.batch_size, s.time_steps}, 0.0 /*mean*/, 0.1 /*std*/);
+  // }
+
+
+
 }
 
 }  // namespace mppi
